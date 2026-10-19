@@ -13,6 +13,7 @@
   --bg:var(--mist); --surface:var(--paper); --surface-2:#F6F9F3; --line:#D6E3D1;
   --text:var(--moss); --text-2:#587060; --accent:var(--leaf); --accent-ink:#FFFFFF;
   --warn:#C77B2B; --done:#8EA893;
+  --p1:#D64545; --p2:#E0A82E; --p3:#4F9D5D;
   --r:14px; --r-s:8px;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
@@ -21,11 +22,13 @@
   color-scheme: dark;
   --bg:#101A14; --surface:#172419; --surface-2:#1E2D22; --line:#2B3F31;
   --text:#E6EFE3; --text-2:#9DB3A3; --accent:#6DB37D; --accent-ink:#0E1A12; --sage:#2E4A38; --done:#5C7363;
+  --p1:#E86B6B; --p2:#E8B94A; --p3:#6DBE7C;
 }}
 :root[data-theme="dark"]{
   color-scheme: dark;
   --bg:#101A14; --surface:#172419; --surface-2:#1E2D22; --line:#2B3F31;
   --text:#E6EFE3; --text-2:#9DB3A3; --accent:#6DB37D; --accent-ink:#0E1A12; --sage:#2E4A38; --done:#5C7363;
+  --p1:#E86B6B; --p2:#E8B94A; --p3:#6DBE7C;
 }
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -49,6 +52,9 @@ header h1 small{display:block;font-size:14px;font-weight:600;color:var(--text-2)
 .add .prio{display:inline-flex;gap:0;padding:0;overflow:hidden}
 .add .prio button{border:0;background:none;padding:6px 12px;font-weight:600;cursor:pointer;color:var(--text-2)}
 .add .prio button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+.add .prio button[data-p="1"][aria-pressed=true]{background:var(--p1);color:#fff}
+.add .prio button[data-p="2"][aria-pressed=true]{background:var(--p2);color:#fff}
+.add .prio button[data-p="3"][aria-pressed=true]{background:var(--p3);color:#fff}
 .add .hint{font-size:13px;color:var(--text-2);margin-left:auto}
 .add .hint code{background:var(--surface-2);padding:1px 5px;border-radius:4px}
 textarea#bulk{display:none;width:100%;margin-top:10px;border:1px solid var(--line);border-radius:var(--r-s);padding:10px;min-height:110px;background:var(--surface-2);resize:vertical}
@@ -69,9 +75,13 @@ textarea#bulk{display:none;width:100%;margin-top:10px;border:1px solid var(--lin
 /* Liste */
 .group{margin-bottom:22px}
 .group h2{font-size:14px;font-weight:800;color:var(--text-2);margin:0 0 6px 4px;display:flex;justify-content:space-between}
-.task{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:6px;overflow:hidden}
+.task{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--pc,var(--line));border-radius:var(--r);margin-bottom:6px;overflow:hidden}
+.task.p1{--pc:var(--p1)} .task.p2{--pc:var(--p2)} .task.p3{--pc:var(--p3)}
+.task.done{--pc:var(--done)}
+.group h2.p1{--pc:var(--p1)} .group h2.p2{--pc:var(--p2)} .group h2.p3{--pc:var(--p3)}
+.group h2[class] span:first-child{color:var(--pc)}
 .task .head{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 12px;cursor:pointer}
-.task .check{width:22px;height:22px;border-radius:50%;border:2px solid var(--fern);background:none;cursor:pointer;flex:none;display:grid;place-items:center;padding:0}
+.task .check{width:22px;height:22px;border-radius:50%;border:2px solid var(--pc,var(--fern));background:none;cursor:pointer;flex:none;display:grid;place-items:center;padding:0}
 .task.done .check{background:var(--done);border-color:var(--done)}
 .task .check svg{width:12px;height:12px;stroke:#fff;stroke-width:3;fill:none;opacity:0}
 .task.done .check svg{opacity:1}
@@ -80,7 +90,7 @@ textarea#bulk{display:none;width:100%;margin-top:10px;border:1px solid var(--lin
 .task .meta{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text-2);flex-wrap:wrap;justify-content:flex-end}
 .tag{border-radius:999px;padding:2px 8px;background:var(--surface-2);border:1px solid var(--line);white-space:nowrap}
 .tag.help{background:#FFF1E2;border-color:#F0C9A0;color:var(--warn);font-weight:700}
-.tag.p1{border-color:var(--accent);color:var(--accent);font-weight:700}
+.tag.prio{border-color:var(--pc);color:var(--pc);background:color-mix(in srgb,var(--pc) 14%,transparent);font-weight:700}
 .tag.note::before{content:"✎ "}
 .task .body{display:none;padding:0 12px 12px;border-top:1px dashed var(--line);background:var(--surface-2)}
 .task.open .body{display:block}
@@ -95,16 +105,66 @@ textarea#bulk{display:none;width:100%;margin-top:10px;border:1px solid var(--lin
 .empty{padding:40px 12px;text-align:center;color:var(--text-2)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--moss);color:#fff;padding:10px 16px;border-radius:999px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
+/* Faner */
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:8px 14px;font-weight:700;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-pressed=true]{color:var(--text);border-bottom-color:var(--accent)}
+body[data-tab=stats] #add,body[data-tab=stats] .filters,body[data-tab=stats] #list{display:none}
+body[data-tab=list] #stats{display:none}
+
+/* Statistik */
+#stats{display:grid;gap:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 8px;text-align:center}
+.kpi b{display:block;font-size:28px;font-weight:800;line-height:1.1}
+.kpi span{font-size:12px;color:var(--text-2);font-weight:700}
+.kpi.bad b{color:var(--p1)}
+.ring{width:56px;height:56px;display:block;margin:-6px auto 0}
+.ring circle{fill:none;stroke-width:8} .ring .bg{stroke:var(--line)} .ring .fg{stroke:var(--accent);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%}
+.ring text{font-size:17px;font-weight:800;fill:var(--text)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;min-width:0}
+.card.wide{grid-column:1/-1}
+.card h3{margin:0 0 10px;font-size:14px;font-weight:800;color:var(--text-2)}
+.card .sub{margin:-6px 0 12px;font-size:12px;color:var(--text-2)}
+.card .muted{color:var(--text-2);font-size:14px}
+.stack{display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--surface-2)}
+.stack i{display:block;height:100%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:13px;font-weight:600}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--c);margin-right:6px;vertical-align:-1px}
+.kv{display:grid;gap:8px} .kv div{display:flex;justify-content:space-between;font-size:14px;font-weight:600} .kv b{font-weight:800}
+.kv .bad{color:var(--p1)}
+.hbars{display:grid;gap:6px}
+.hbar{display:grid;grid-template-columns:150px 1fr auto;gap:10px;align-items:center;font-size:14px;font-weight:600;cursor:pointer;background:none;border:0;padding:4px 0;width:100%;text-align:left;color:var(--text)}
+.hbar:hover .bar i{opacity:.8}
+.hbar .bar{height:12px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.hbar .bar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.hbar small{color:var(--text-2);white-space:nowrap}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
+.tile{border:1px solid var(--line);border-radius:var(--r-s);padding:10px;text-align:left;cursor:pointer;background:var(--surface-2);color:var(--text);min-height:64px;display:flex;flex-direction:column;justify-content:space-between;gap:4px}
+.tile:hover{border-color:var(--accent)}
+.tile b{font-size:13px;line-height:1.2} .tile span{font-size:12px;color:var(--text-2);font-weight:700}
+.tile.clear{opacity:.55}
+.chart{width:100%;height:auto;display:block}
+.chart .b-add{fill:var(--sage)} .chart .b-done{fill:var(--accent)}
+.chart .v{font-size:11px;fill:var(--text-2);text-anchor:middle;font-weight:700} .chart .l{font-size:11px;fill:var(--text-2);text-anchor:middle} .chart .axis{stroke:var(--line)}
+.old{display:grid;gap:8px} .old div{display:flex;justify-content:space-between;gap:10px;font-size:14px;font-weight:600;align-items:baseline} .old small{color:var(--text-2);white-space:nowrap;font-weight:600}
+.old .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:6px;vertical-align:1px}
+@media (max-width:520px){ .cards{grid-template-columns:1fr} .hbar{grid-template-columns:110px 1fr auto} .kpis{grid-template-columns:repeat(3,1fr)} }
 @media (max-width:520px){ .task .head{grid-template-columns:auto 1fr} .task .meta{grid-column:2;justify-content:flex-start} .body .grid{grid-template-columns:1fr} header{flex-direction:column;align-items:flex-start} .mode{text-align:left} }
 @media (prefers-reduced-motion:reduce){ .toast{transition:none} }
 </style>
 </head>
-<body>
+<body data-tab="list">
 <div class="wrap">
   <header>
     <h1>Arnevangen 35<small>Opgaver i huset</small></h1>
     <div class="mode" id="mode"></div>
   </header>
+
+  <div class="tabs" id="tabs" role="tablist">
+    <button data-tab="list" aria-pressed="true">Liste</button><button data-tab="stats" aria-pressed="false">Statistik</button>
+  </div>
 
   <section class="add" id="add" aria-label="Ny opgave">
     <div class="row">
@@ -134,6 +194,7 @@ textarea#bulk{display:none;width:100%;margin-top:10px;border:1px solid var(--lin
   </div>
 
   <main id="list"></main>
+  <section id="stats" aria-label="Statistik"></section>
 </div>
 <div class="toast" id="toast" role="status"></div>
 
@@ -191,7 +252,7 @@ function loadScript(src){ return new Promise((res, rej) => { const s=document.cr
 
 /* ======== UI-STATE ======== */
 const $ = s => document.querySelector(s);
-const state = { status:"aaben", sted:"", kat:"", help:"", sort:"sted", open:null, prio:2 };
+const state = { status:"aaben", sted:"", kat:"", help:"", sort:"sted", open:null, prio:2, tab:"list" };
 function setMode(label, extra){ $("#mode").innerHTML = (extra ? extra + "<br>" : "") + "<span>"+label+"</span>"; }
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2200); }
 function esc(s){ return String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
@@ -246,6 +307,7 @@ function sortTasks(arr){
 }
 function fmtDate(iso){ if(!iso) return ""; const d=new Date(iso); return d.toLocaleDateString("da-DK",{day:"numeric",month:"short"}); }
 function render(){
+  renderStats();
   const list = sortTasks(visible());
   const openCount = tasks.filter(t=>t.status==="aaben").length;
   $("#count").textContent = `${list.length} vist · ${openCount} åbne i alt`;
@@ -253,15 +315,15 @@ function render(){
   const groups = {}; const key = t => state.sort==="sted" ? (t.sted||"Uden sted") : state.sort==="prio" ? PRIO[t.prioritet] : state.sort==="frist" ? (t.frist ? "Frist " + fmtDate(t.frist) : "Uden frist") : "Opgaver";
   for (const t of list) (groups[key(t)] ||= []).push(t);
   $("#list").innerHTML = Object.entries(groups).map(([g, items]) => `
-    <section class="group"><h2><span>${esc(g)}</span><span>${items.length}</span></h2>
+    <section class="group"><h2 class="${state.sort==="prio"?"p"+items[0].prioritet:""}"><span>${esc(g)}</span><span>${items.length}</span></h2>
     ${items.map(t => `
-      <article class="task ${t.status==="udfoert"?"done":""} ${state.open===t.id?"open":""}" data-id="${t.id}">
+      <article class="task p${t.prioritet} ${t.status==="udfoert"?"done":""} ${state.open===t.id?"open":""}" data-id="${t.id}">
         <div class="head">
           <button class="check" data-act="toggle" aria-label="Markér som ${t.status==="udfoert"?"åben":"udført"}"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></svg></button>
           <div class="title">${esc(t.titel)}</div>
           <div class="meta">
             ${t.hjaelp?`<span class="tag help">Kræver hjælp</span>`:""}
-            ${t.prioritet===1?`<span class="tag p1">Høj</span>`:t.prioritet===3?`<span class="tag">Lav</span>`:""}
+            ${t.prioritet!==2?`<span class="tag prio">${PRIO[t.prioritet]}</span>`:""}
             ${state.sort!=="sted"&&t.sted?`<span class="tag">${esc(t.sted)}</span>`:""}
             ${t.kategori?`<span class="tag">${esc(t.kategori)}</span>`:""}
             ${t.frist&&state.sort!=="frist"?`<span class="tag">${fmtDate(t.frist)}</span>`:""}
@@ -287,7 +349,107 @@ function render(){
     </section>`).join("");
 }
 
+/* ======== STATISTIK ======== */
+const isoDay = d => d.toISOString().slice(0,10);
+const daysBetween = (a,b) => Math.round((new Date(b)-new Date(a))/86400000);
+function ring(pct){ const r=34, c=2*Math.PI*r; return `<svg class="ring" viewBox="0 0 80 80" aria-hidden="true"><circle class="bg" cx="40" cy="40" r="${r}"/><circle class="fg" cx="40" cy="40" r="${r}" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c*(1-pct/100)).toFixed(1)}"/><text x="40" y="46" text-anchor="middle">${pct}%</text></svg>`; }
+function weekChart(weeks){
+  const W=600,H=170,pad=26,bw=W/weeks.length, max=Math.max(1,...weeks.flatMap(w=>[w.added,w.done]));
+  const y=v=>H-pad-(v/max)*(H-pad-16);
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tilføjede og udførte opgaver pr. uge">
+    ${weeks.map((w,i)=>{ const x=i*bw; return `
+      <rect class="b-add" x="${(x+bw*.14).toFixed(1)}" y="${y(w.added).toFixed(1)}" width="${(bw*.32).toFixed(1)}" height="${(H-pad-y(w.added)).toFixed(1)}" rx="3"/>
+      <rect class="b-done" x="${(x+bw*.54).toFixed(1)}" y="${y(w.done).toFixed(1)}" width="${(bw*.32).toFixed(1)}" height="${(H-pad-y(w.done)).toFixed(1)}" rx="3"/>
+      ${w.added?`<text class="v" x="${(x+bw*.3).toFixed(1)}" y="${(y(w.added)-4).toFixed(1)}">${w.added}</text>`:""}
+      ${w.done?`<text class="v" x="${(x+bw*.7).toFixed(1)}" y="${(y(w.done)-4).toFixed(1)}">${w.done}</text>`:""}
+      ${i%2===1?`<text class="l" x="${(x+bw/2).toFixed(1)}" y="${H-8}">${w.label}</text>`:""}`; }).join("")}
+    <line class="axis" x1="0" x2="${W}" y1="${H-pad}" y2="${H-pad}"/>
+  </svg>`;
+}
+function renderStats(){
+  const open = tasks.filter(t=>t.status==="aaben"), done = tasks.filter(t=>t.status==="udfoert");
+  const total = tasks.length, pct = total ? Math.round(done.length/total*100) : 0;
+  const now = new Date(), today = isoDay(now), in7 = isoDay(new Date(now.getTime()+7*86400000));
+  const overdue = open.filter(t=>t.frist && t.frist<today), soon = open.filter(t=>t.frist && t.frist>=today && t.frist<=in7);
+  const later = open.filter(t=>t.frist && t.frist>in7), noDue = open.filter(t=>!t.frist);
+  const help = open.filter(t=>t.hjaelp);
+  const byP = [1,2,3].map(p=>open.filter(t=>t.prioritet===p).length);
+  const weight = t => 4-(t.prioritet||2);
+
+  const rooms = STEDER.map(s=>{ const o=open.filter(t=>t.sted===s); return { s, n:o.length, w:o.reduce((a,t)=>a+weight(t),0), done:done.filter(t=>t.sted===s).length }; }).filter(r=>r.n||r.done);
+  const maxW = Math.max(1,...rooms.map(r=>r.w));
+  const kats = KATEGORIER.map(k=>{ const o=open.filter(t=>t.kategori===k); return { k, n:o.length, h:o.filter(t=>t.prioritet===1).length, help:o.filter(t=>t.hjaelp).length }; }).filter(x=>x.n).sort((a,b)=>b.n-a.n);
+  const maxK = Math.max(1,...kats.map(x=>x.n));
+
+  const d30 = new Date(now.getTime()-30*86400000).toISOString();
+  const done30 = done.filter(t=>t.udfoertDato && t.udfoertDato>=d30).length, added30 = tasks.filter(t=>t.oprettet>=d30).length;
+  const lie = done.filter(t=>t.udfoertDato&&t.oprettet).map(t=>daysBetween(t.oprettet,t.udfoertDato));
+  const avgLie = lie.length ? Math.round(lie.reduce((a,b)=>a+b,0)/lie.length) : null;
+  const perWeek = done30/30*7, etaW = perWeek>0 ? Math.ceil(open.length/perWeek) : null;
+  const etaTxt = etaW===null ? "Ingen opgaver udført de sidste 30 dage – svært at spå om tempoet." : etaW<=8 ? `Med det tempo er alle åbne opgaver klaret om ca. <b>${etaW} uge${etaW===1?"":"r"}</b>.` : etaW<=60 ? `Med det tempo er alle åbne opgaver klaret om ca. <b>${Math.round(etaW/4.33)} måneder</b>.` : `Med det tempo tager det <b>over et år</b> at nå bunden af listen.`;
+  const oldest = open.slice().sort((a,b)=>a.oprettet.localeCompare(b.oprettet)).slice(0,4);
+
+  const weeks=[]; for(let i=11;i>=0;i--){ const end=new Date(now); end.setHours(23,59,59,999); end.setDate(end.getDate()-i*7); const start=new Date(end); start.setDate(start.getDate()-6); start.setHours(0,0,0,0); const si=start.toISOString(), ei=end.toISOString();
+    weeks.push({ label:start.toLocaleDateString("da-DK",{day:"numeric",month:"short"}), added:tasks.filter(t=>t.oprettet>=si&&t.oprettet<=ei).length, done:done.filter(t=>t.udfoertDato>=si&&t.udfoertDato<=ei).length }); }
+
+  const pBar = open.length ? byP.map((n,i)=>n?`<i style="width:${n/open.length*100}%;background:var(--p${i+1})" title="${PRIO[i+1]}: ${n}"></i>`:"").join("") : "";
+
+  $("#stats").innerHTML = !total ? `<div class="empty">Ingen opgaver endnu – statistikken kommer, når listen gør.</div>` : `
+    <div class="kpis">
+      <div class="kpi"><b>${open.length}</b><span>Åbne</span></div>
+      <div class="kpi"><b>${done.length}</b><span>Udførte</span></div>
+      <div class="kpi">${ring(pct)}<span>Fuldført</span></div>
+      <div class="kpi ${overdue.length?"bad":""}"><b>${overdue.length}</b><span>Forfaldne</span></div>
+      <div class="kpi"><b>${help.length}</b><span>Kræver hjælp</span></div>
+    </div>
+    <div class="cards">
+      <div class="card"><h3>Prioritet – åbne opgaver</h3>
+        ${open.length?`<div class="stack">${pBar}</div><div class="legend"><span style="--c:var(--p1)">Høj ${byP[0]}</span><span style="--c:var(--p2)">Normal ${byP[1]}</span><span style="--c:var(--p3)">Lav ${byP[2]}</span></div>`:`<p class="muted">Alt er klaret. Flot.</p>`}
+      </div>
+      <div class="card"><h3>Frister</h3>
+        <div class="kv">
+          <div><span>Forfaldne</span><b class="${overdue.length?"bad":""}">${overdue.length}</b></div>
+          <div><span>Inden for 7 dage</span><b>${soon.length}</b></div>
+          <div><span>Senere</span><b>${later.length}</b></div>
+          <div><span>Uden frist</span><b>${noDue.length}</b></div>
+        </div>
+      </div>
+      <div class="card wide"><h3>Husets varmekort</h3><p class="sub">Jo rødere, jo mere trænger rummet – antal åbne opgaver vægtet efter prioritet. Tryk på et rum for at se opgaverne.</p>
+        <div class="tiles">${rooms.sort((a,b)=>b.w-a.w||a.s.localeCompare(b.s,"da")).map(r=>`
+          <button class="tile ${r.n?"":"clear"}" data-sted="${esc(r.s)}" style="${r.n?`background:color-mix(in srgb,var(--p1) ${Math.round(8+52*r.w/maxW)}%,var(--surface-2))`:""}"><b>${esc(r.s)}</b><span>${r.n?`${r.n} åben${r.n===1?"":"e"}`:"alt klaret ✓"}</span></button>`).join("")}
+        </div>
+      </div>
+      <div class="card wide"><h3>Hvem skal du have fat i?</h3><p class="sub">Åbne opgaver pr. kategori – godt til at samle opgaver, inden du ringer til håndværkeren. Tryk for at se listen.</p>
+        ${kats.length?`<div class="hbars">${kats.map(x=>`<button class="hbar" data-kat="${esc(x.k)}"><span>${esc(x.k)}</span><span class="bar"><i style="width:${x.n/maxK*100}%"></i></span><small><b>${x.n}</b>${x.h?` · ${x.h} høj`:""}${x.help?` · ${x.help} m. hjælp`:""}</small></button>`).join("")}</div>`:`<p class="muted">Ingen åbne opgaver.</p>`}
+      </div>
+      <div class="card"><h3>Tempo</h3>
+        <div class="kv">
+          <div><span>Udført sidste 30 dage</span><b>${done30}</b></div>
+          <div><span>Tilføjet sidste 30 dage</span><b>${added30}</b></div>
+          <div><span>Gns. liggetid (oprettet → udført)</span><b>${avgLie===null?"–":avgLie+" dage"}</b></div>
+        </div>
+        <p class="muted" style="margin:12px 0 0">${etaTxt}</p>
+      </div>
+      <div class="card"><h3>Støvsamlere – ældste åbne</h3>
+        ${oldest.length?`<div class="old">${oldest.map(t=>`<div><span><i class="dot" style="--c:var(--p${t.prioritet})"></i>${esc(t.titel)}</span><small>${daysBetween(t.oprettet,now)} dage</small></div>`).join("")}</div>`:`<p class="muted">Ingen åbne opgaver.</p>`}
+      </div>
+      <div class="card wide"><h3>Aktivitet – sidste 12 uger</h3>
+        ${weekChart(weeks)}
+        <div class="legend"><span style="--c:var(--sage)">Tilføjet</span><span style="--c:var(--accent)">Udført</span></div>
+      </div>
+    </div>`;
+}
+function setTab(tab){ state.tab = tab; document.body.dataset.tab = tab; [...$("#tabs").children].forEach(b=>b.setAttribute("aria-pressed", b.dataset.tab===tab)); }
+function showList(filter){
+  state.status="aaben"; state.sted=filter.sted||""; state.kat=filter.kat||""; state.help="";
+  $("#fSted").value=state.sted; $("#fKat").value=state.kat; $("#fHelp").value="";
+  [...$("#statusSeg").children].forEach(x=>x.setAttribute("aria-pressed", x.dataset.s==="aaben"));
+  setTab("list"); render(); window.scrollTo({top:0,behavior:"smooth"});
+}
+
 /* ======== EVENTS ======== */
+$("#tabs").onclick = e => { const b = e.target.closest("button"); if(b) setTab(b.dataset.tab); };
+$("#stats").addEventListener("click", e => { const b = e.target.closest("[data-sted],[data-kat]"); if(!b) return; showList({ sted:b.dataset.sted, kat:b.dataset.kat }); });
 $("#addBtn").onclick = addFromInput;
 $("#newTitle").addEventListener("keydown", e => { if (e.key==="Enter") addFromInput(); });
 $("#bulkToggle").onclick = () => { const on = $("#add").classList.toggle("bulk"); $("#bulkAdd").style.display = on?"":"none"; $("#bulkToggle").textContent = on ? "Én ad gangen" : "Flere ad gangen"; (on?$("#bulk"):$("#newTitle")).focus(); };
