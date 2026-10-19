@@ -36,7 +36,24 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.45}
 h1,h2,h3,.kpi b,.ring text,.tabs button{font-family:Outfit,Inter,system-ui,sans-serif}
 button,input,select,textarea{font:inherit;color:inherit}
-input[type=date]{font-family:Inter,system-ui,sans-serif}
+.datewrap{position:relative}
+.datebtn{width:100%;text-align:left;border:1px solid var(--line);border-radius:var(--r-s);padding:8px 10px;background:var(--surface);cursor:pointer}
+.datebtn.empty{color:var(--text-2)}
+.dateclear{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--text-2);font-size:18px;line-height:1;cursor:pointer;padding:2px 6px}
+.dp{position:absolute;z-index:50;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;width:272px;display:none}
+.dp.show{display:block}
+.dp .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.dp .top b{font-family:Outfit,Inter,sans-serif;font-size:15px;text-transform:capitalize}
+.dp .top button{border:0;background:var(--surface-2);border-radius:999px;width:30px;height:30px;cursor:pointer;font-size:16px}
+.dp .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.dp .wd{font-size:11px;font-weight:700;color:var(--text-2);padding:4px 0}
+.dp .d{border:0;background:none;border-radius:8px;height:32px;cursor:pointer;font-weight:600;font-size:13px}
+.dp .d:hover{background:var(--surface-2)}
+.dp .d.out{color:var(--text-2);opacity:.45}
+.dp .d.today{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.dp .d.sel{background:var(--accent);color:var(--accent-ink)}
+.dp .foot{display:flex;justify-content:space-between;margin-top:8px}
+.dp .foot button{border:0;background:none;color:var(--accent);font-weight:700;cursor:pointer;padding:6px 4px}
 .wrap{max-width:820px;margin:0 auto;padding:20px 16px 80px}
 
 header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:18px}
@@ -201,6 +218,7 @@ body[data-tab=list] #stats{display:none}
   <section id="stats" aria-label="Statistik"></section>
 </div>
 <div class="toast" id="toast" role="status"></div>
+<div class="dp" id="dp" role="dialog" aria-label="Vælg dato"></div>
 
 <script src="config.js"></script>
 <script>
@@ -310,6 +328,44 @@ function sortTasks(arr){
   if (state.sort==="nyeste") return arr.sort((a,b)=>b.oprettet.localeCompare(a.oprettet));
   return arr.sort(bySted);
 }
+function fmtDateLong(iso){ if(!iso) return ""; const [y,m,d]=iso.split("-"); return `${d}-${m}-${y}`; }
+function isoLocal(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+const dp = { el:null, id:null, view:null, sel:"" };
+const MDR=["januar","februar","marts","april","maj","juni","juli","august","september","oktober","november","december"];
+function dpOpen(btn, id){
+  dp.el = $("#dp"); dp.id = id; dp.sel = btn.dataset.val || "";
+  const base = dp.sel ? new Date(dp.sel+"T00:00") : new Date(); dp.view = new Date(base.getFullYear(), base.getMonth(), 1);
+  dpRender();
+  const r = btn.getBoundingClientRect(); dp.el.classList.add("show");
+  const w = dp.el.offsetWidth, h = dp.el.offsetHeight;
+  let left = r.left + window.scrollX, top = r.bottom + window.scrollY + 6;
+  if (left + w > window.scrollX + document.documentElement.clientWidth - 8) left = window.scrollX + document.documentElement.clientWidth - w - 8;
+  if (r.bottom + h + 6 > window.innerHeight && r.top - h - 6 > 0) top = r.top + window.scrollY - h - 6;
+  dp.el.style.left = left+"px"; dp.el.style.top = top+"px";
+}
+function dpClose(){ if(dp.el){ dp.el.classList.remove("show"); dp.id=null; } }
+function dpRender(){
+  const y=dp.view.getFullYear(), m=dp.view.getMonth(), today=isoLocal(new Date());
+  const first=new Date(y,m,1); const offset=(first.getDay()+6)%7; const start=new Date(y,m,1-offset);
+  let cells="";
+  for(let i=0;i<42;i++){ const d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i); const iso=isoLocal(d);
+    cells+=`<button type="button" class="d ${d.getMonth()!==m?"out":""} ${iso===today?"today":""} ${iso===dp.sel?"sel":""}" data-iso="${iso}">${d.getDate()}</button>`; }
+  dp.el.innerHTML = `<div class="top"><button type="button" data-nav="-1" aria-label="Forrige måned">‹</button><b>${MDR[m]} ${y}</b><button type="button" data-nav="1" aria-label="Næste måned">›</button></div>
+    <div class="grid">${["Ma","Ti","On","To","Fr","Lø","Sø"].map(w=>`<span class="wd">${w}</span>`).join("")}${cells}</div>
+    <div class="foot"><button type="button" data-dp="clear">Ryd</button><button type="button" data-dp="today">I dag</button></div>`;
+}
+async function dpSet(iso){ const id=dp.id; dpClose(); if(id) await store.update(id, { frist: iso }); }
+document.addEventListener("click", e => {
+  if (!dp.el || !dp.el.classList.contains("show")) return;
+  if (dp.el.contains(e.target)) {
+    const nav = e.target.closest("[data-nav]"); if (nav) { dp.view.setMonth(dp.view.getMonth()+ +nav.dataset.nav); dpRender(); return; }
+    const d = e.target.closest("[data-iso]"); if (d) { dpSet(d.dataset.iso); return; }
+    const a = e.target.closest("[data-dp]")?.dataset.dp; if (a==="clear") dpSet(""); if (a==="today") dpSet(isoLocal(new Date()));
+    return;
+  }
+  if (!e.target.closest("[data-act=date]")) dpClose();
+});
+document.addEventListener("keydown", e => { if (e.key==="Escape") dpClose(); });
 function fmtDate(iso){ if(!iso) return ""; const d=new Date(iso); return d.toLocaleDateString("da-DK",{day:"numeric",month:"short"}); }
 function render(){
   renderStats();
@@ -338,7 +394,7 @@ function render(){
         <div class="body">
           <div class="grid">
             <div><label>Opgave</label><input data-f="titel" value="${esc(t.titel)}"></div>
-            <div><label>Frist</label><input type="date" data-f="frist" value="${esc(t.frist)}"></div>
+            <div><label>Frist</label><div class="datewrap"><button type="button" class="datebtn ${t.frist?"":"empty"}" data-act="date" data-val="${esc(t.frist)}">${t.frist?fmtDateLong(t.frist):"dd-mm-åååå"}</button>${t.frist?`<button type="button" class="dateclear" data-act="dateclear" aria-label="Ryd frist">×</button>`:""}</div></div>
             <div><label>Sted</label><select data-f="sted">${STEDER.map(s=>`<option ${s===t.sted?"selected":""}>${esc(s)}</option>`).join("")}</select></div>
             <div><label>Kategori</label><select data-f="kategori">${KATEGORIER.map(k=>`<option ${k===t.kategori?"selected":""}>${esc(k)}</option>`).join("")}</select></div>
             <div><label>Prioritet</label><select data-f="prioritet">${[1,2,3].map(p=>`<option value="${p}" ${p===t.prioritet?"selected":""}>${PRIO[p]}</option>`).join("")}</select></div>
@@ -471,6 +527,8 @@ $("#list").addEventListener("click", async e => {
   const art = e.target.closest(".task"); if(!art) return; const id = art.dataset.id;
   const act = e.target.closest("[data-act]")?.dataset.act;
   if (act==="toggle") { const t = tasks.find(x=>x.id===id); const done = t.status!=="udfoert"; await store.update(id, { status: done?"udfoert":"aaben", udfoertDato: done?new Date().toISOString():"" }); toast(done?"Udført":"Åbnet igen"); return; }
+  if (act==="date") { const b=e.target.closest("[data-act=date]"); if (dp.id===id && $("#dp").classList.contains("show")) dpClose(); else dpOpen(b, id); return; }
+  if (act==="dateclear") { await store.update(id, { frist: "" }); return; }
   if (act==="delete") { if (confirm("Slet opgaven?")) { await store.remove(id); state.open=null; } return; }
   if (e.target.closest(".head")) { state.open = state.open===id ? null : id; render(); }
 });
