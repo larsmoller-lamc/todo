@@ -38,7 +38,7 @@ h1,h2,h3,.kpi b,.ring text,.tabs button{font-family:Outfit,Inter,system-ui,sans-
 button,input,select,textarea{font:inherit;color:inherit}
 .datewrap{position:relative}
 .datebtn{width:100%;text-align:left;border:1px solid var(--line);border-radius:var(--r-s);padding:8px 10px;background:var(--surface);cursor:pointer}
-.datebtn.empty{color:var(--text-2)}
+.datebtn.blank{color:var(--text-2)}
 .dateclear{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--text-2);font-size:18px;line-height:1;cursor:pointer;padding:2px 6px}
 .dp{position:absolute;z-index:50;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;width:272px;display:none}
 .dp.show{display:block}
@@ -394,7 +394,7 @@ function render(){
         <div class="body">
           <div class="grid">
             <div><label>Opgave</label><input data-f="titel" value="${esc(t.titel)}"></div>
-            <div><label>Frist</label><div class="datewrap"><button type="button" class="datebtn ${t.frist?"":"empty"}" data-act="date" data-val="${esc(t.frist)}">${t.frist?fmtDateLong(t.frist):"dd-mm-åååå"}</button>${t.frist?`<button type="button" class="dateclear" data-act="dateclear" aria-label="Ryd frist">×</button>`:""}</div></div>
+            <div><label>Frist</label><div class="datewrap"><button type="button" class="datebtn ${t.frist?"":"blank"}" data-act="date" data-val="${esc(t.frist)}">${t.frist?fmtDateLong(t.frist):"dd-mm-åååå"}</button>${t.frist?`<button type="button" class="dateclear" data-act="dateclear" aria-label="Ryd frist">×</button>`:""}</div></div>
             <div><label>Sted</label><select data-f="sted">${STEDER.map(s=>`<option ${s===t.sted?"selected":""}>${esc(s)}</option>`).join("")}</select></div>
             <div><label>Kategori</label><select data-f="kategori">${KATEGORIER.map(k=>`<option ${k===t.kategori?"selected":""}>${esc(k)}</option>`).join("")}</select></div>
             <div><label>Prioritet</label><select data-f="prioritet">${[1,2,3].map(p=>`<option value="${p}" ${p===t.prioritet?"selected":""}>${PRIO[p]}</option>`).join("")}</select></div>
