@@ -203,7 +203,7 @@ body[data-tab=list] #stats{display:none}
 /* Konfiguration ligger i config.js (window.FIREBASE). Mangler filen, eller er apiKey tom, kører appen i lokal tilstand. */
 const FIREBASE = Object.assign({ apiKey: "", collection: "opgaver", requireLogin: true, allowedEmail: "" }, window.FIREBASE || {});
 
-const STEDER = ["Entré","Gang","Alrum","Køkken","Stue","Trappe","Repos","Bryggers","Soveværelse","Bad soveværelse","Carls værelse","Frederiks værelse","Bad Frederik","Gæsteværelse","Williams værelse","Bad William","Hus","Have","Hobbyrum","Garage","Terrasse tag","Terrasse","Pool","Poolhus","Poolterrasse","Indkørsel","Vej","Privat","Vejlaug","FC Rudersdal","Vedbæk Padel"];
+const STEDER = ["Entré","Gang","Alrum","Køkken","Stue","Trappe","Repos","Bryggers","Soveværelse","Bad soveværelse","Carls værelse","Frederiks værelse","Bad Frederik","Gæsteværelse","Williams værelse","Bad William","Hus","Have","Hobbyrum","Garage","Terrasse tag","Terrasse","Pool","Poolhus","Poolterrasse","Indkørsel","Fortov","Privat","Vejlaug","FC Rudersdal","Vedbæk Padel"];
 const KATEGORIER = ["El","VVS","Tømrer","Murer","Maler","Have","Brolægning","Rengøring/oprydning","Vedligehold/sæson","Andet"];
 const PRIO = {1:"Høj",2:"Normal",3:"Lav"};
 
